@@ -5,12 +5,11 @@ import (
 	"github.com/made3ust/Messaging_Servise_Backend/config"
 	"github.com/made3ust/Messaging_Servise_Backend/handlers"
 	"github.com/made3ust/Messaging_Servise_Backend/middleware"
-	"github.com/made3ust/Messaging_Servise_Backend/models"
 )
 
 func main() {
 	config.ConnectDatabase()
-	config.DB.AutoMigrate(&models.User{}, &models.Chat{}, &models.Message{})
+	//config.DB.AutoMigrate(&models.User{}, &models.Chat{}, &models.Message{})
 
 	r := gin.Default()
 
@@ -32,3 +31,5 @@ func main() {
 
 	r.Run(":8080")
 }
+
+//migrate -path migrations -database "postgres://postgres:postgres@localhost:5432/messenger?sslmode=disable" up
