@@ -24,8 +24,40 @@ func GetChats(c *gin.Context) {
 	c.JSON(http.StatusOK, chats)
 }
 
+func GetChatByID(c *gin.Context) {
+	id := c.Param("id")
+	var chat models.Chat
+	if err := config.DB.First(&chat, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Chat not found"})
+		return
+	}
+	c.JSON(http.StatusOK, chat)
+}
+
+func UpdateChat(c *gin.Context) {
+	id := c.Param("id")
+	var chat models.Chat
+	if err := config.DB.First(&chat, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Chat not found"})
+		return
+	}
+	if err := c.ShouldBindJSON(&chat); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	config.DB.Save(&chat)
+	c.JSON(http.StatusOK, chat)
+}
+
 func DeleteChat(c *gin.Context) {
 	id := c.Param("id")
 	config.DB.Delete(&models.Chat{}, id)
 	c.JSON(http.StatusOK, gin.H{"message": "Chat deleted successfully"})
+}
+
+func SearchChats(c *gin.Context) {
+	query := c.Query("q")
+	var chats []models.Chat
+	config.DB.Where("name ILIKE ?", "%"+query+"%").Find(&chats)
+	c.JSON(http.StatusOK, chats)
 }
