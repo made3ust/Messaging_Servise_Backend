@@ -39,7 +39,36 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-	c.ShouldBindJSON(&user)
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	config.DB.Save(&user)
 	c.JSON(http.StatusOK, user)
+}
+
+func GetProfile(c *gin.Context) {
+	username, _ := c.Get("username")
+	var user models.User
+	if err := config.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
+func DeleteUser(c *gin.Context) {
+	id := c.Param("id")
+	if err := config.DB.Delete(&models.User{}, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
+
+func SearchUsers(c *gin.Context) {
+	query := c.Query("q")
+	var users []models.User
+	config.DB.Where("username ILIKE ?", "%"+query+"%").Find(&users)
+	c.JSON(http.StatusOK, users)
 }
