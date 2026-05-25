@@ -14,6 +14,8 @@ func main() {
 
 	r := gin.Default()
 
+	r.Use(middleware.CORSMiddleware())
+
 	r.POST("/register", handlers.Register)
 	r.POST("/login", handlers.Login)
 
